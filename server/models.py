@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.associationproxy import association_proxy
 
 db = SQLAlchemy()
 
@@ -13,8 +14,7 @@ class Exercise(db.Model):
   # Relationship to the join table (WorkoutExercises)
   workout_exercises = db.relationship("WorkoutExercises",back_populates="exercise",cascade="all, delete-orphan")
 
-  # Optional association proxy to access workouts directly if desired
-  # workouts = association_proxy('workout_exercises', 'workout')
+  workouts = association_proxy('workout_exercises', 'workout')
 
   def __repr__(self):
     return (f"<Exercise id={self.id}, name='{self.name}',"f" category='{self.category}'>")
@@ -30,8 +30,7 @@ class Workout(db.Model):
   # Relationship to the join table (WorkoutExercises)
   workout_exercises = db.relationship("WorkoutExercises", back_populates="workout", cascade="all, delete-orphan")
 
-  # Optional association proxy to access exercises directly if desired
-  # exercises = association_proxy('workout_exercises', 'exercise')
+  exercises = association_proxy('workout_exercises', 'exercise')
 
   def __repr__(self):
     return f"<Workout id={self.id}, date='{self.date}'>"
