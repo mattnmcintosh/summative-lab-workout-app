@@ -35,7 +35,21 @@ def get_workout(id):
 
 @app.route("/workouts", methods=["POST"])
 def create_workout():
-    pass
+  data = request.get_json() or {}
+  try:
+    validated_data = workout_schema.load(data)
+
+    new_workout = Workout(
+        date=validated_data.get("date"),
+        duration_minutes=validated_data.get("duration_minutes"),
+        notes=validated_data.get("notes"),
+    )
+    db.session.add(new_workout)
+    db.session.commit()
+    return jsonify(workout_schema.dump(new_workout)), 201
+  except Exception as e:
+    db.session.rollback()
+    return jsonify({"error": e.messages if hasattr(e, "messages") else str(e)}), 400
 
 @app.route("/workouts/<int:id>", methods=["DELETE"])
 def delete_workout(id):
