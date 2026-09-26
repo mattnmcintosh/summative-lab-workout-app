@@ -102,7 +102,32 @@ def delete_exercise(id):
 
 @app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises",methods=["POST"])
 def add_exercise_to_workout(workout_id, exercise_id):
-    pass
+  workout = Workout.query.get(workout_id)
+  exercise = Exercise.query.get(exercise_id)
+
+  if not workout or not exercise:
+    return jsonify({"error": "Workout or Exercise not found"}), 404
+
+  data = request.get_json() or {}
+  data["workout_id"] = workout_id
+  data["exercise_id"] = exercise_id
+
+  try:
+    validated_data = workout_exercise_schema.load(data)
+
+    new_we = WorkoutExercises(
+        workout_id=validated_data["workout_id"],
+        exercise_id=validated_data["exercise_id"],
+        reps=validated_data.get("reps"),
+        sets=validated_data.get("sets"),
+        duration_seconds=validated_data.get("duration_seconds"),
+    )
+    db.session.add(new_we)
+    db.session.commit()
+    return jsonify(workout_exercise_schema.dump(new_we)), 201
+  except Exception as e:
+    db.session.rollback()
+    return jsonify({"error": e.messages if hasattr(e, "messages") else str(e)}), 400
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
