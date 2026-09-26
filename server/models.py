@@ -47,7 +47,7 @@ class Workout(db.Model):
 
   exercises = association_proxy('workout_exercises', 'exercise')
 
-  __table_args__ = (CheckConstraint("duration_minutes > 0", name="check_duration_minutes_positive"))
+  __table_args__ = (CheckConstraint("duration_minutes > 0", name="check_duration_minutes_positive"),)
 
   def __repr__(self):
     return f"<Workout id={self.id}, date='{self.date}'>"
@@ -66,7 +66,7 @@ class WorkoutExercises(db.Model):
   workout = db.relationship("Workout", back_populates="workout_exercises")
   exercise = db.relationship("Exercise", back_populates="workout_exercises")
 
-  __table_args__ = (CheckConstraint("reps >= 0", name="check_reps_non_negative"))
+  __table_args__ = (CheckConstraint("reps >= 0", name="check_reps_non_negative"),)
 
   def __repr__(self):
     return (
