@@ -1,7 +1,9 @@
-from flask import Flask, make_response
+from datetime import datetime
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 
-from models import *
+from models import Exercise, Workout, WorkoutExercises, db
+from schemas import ExerciseSchema, WorkoutExercisesSchema, WorkoutSchema
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -9,11 +11,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 migrate = Migrate(app, db)
 
+exercise_schema = ExerciseSchema()
+exercises_schema = ExerciseSchema(many=True)
+
+workout_schema = WorkoutSchema()
+workouts_schema = WorkoutSchema(many=True)
+
+workout_exercise_schema = WorkoutExercisesSchema()
+
 db.init_app(app)
 
 @app.route("/workouts", methods=["GET"])
 def get_workouts():
-    pass
+    workouts = Workout.query.all()
+    return jsonify(workouts_schema.dump(workouts)), 200
 
 @app.route("/workouts/<int:id>", methods=["GET"])
 def get_workout(id):
