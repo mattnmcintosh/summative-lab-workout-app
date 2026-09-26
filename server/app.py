@@ -74,7 +74,21 @@ def get_exercise(id):
 
 @app.route("/exercises", methods=["POST"])
 def create_exercise():
-    pass
+  data = request.get_json() or {}
+  try:
+    validated_data = exercise_schema.load(data)
+
+    new_exercise = Exercise(
+        name=validated_data.get("name"),
+        category=validated_data.get("category"),
+        equipment_needed=validated_data.get("equipment_needed", False),
+    )
+    db.session.add(new_exercise)
+    db.session.commit()
+    return jsonify(exercise_schema.dump(new_exercise)), 201
+  except Exception as e:
+    db.session.rollback()
+    return jsonify({"error": e.messages if hasattr(e, "messages") else str(e)}), 400
 
 @app.route("/exercises/<int:id>", methods=["DELETE"])
 def delete_exercise(id):
