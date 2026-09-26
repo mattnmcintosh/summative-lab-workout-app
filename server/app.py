@@ -67,7 +67,10 @@ def get_exercises():
 
 @app.route("/exercises/<int:id>", methods=["GET"])
 def get_exercise(id):
-    pass
+  exercise = Exercise.query.get(id)
+  if not exercise:
+    return jsonify({"error": "Exercise not found"}), 404
+  return jsonify(exercise_schema.dump(exercise)), 200
 
 @app.route("/exercises", methods=["POST"])
 def create_exercise():
