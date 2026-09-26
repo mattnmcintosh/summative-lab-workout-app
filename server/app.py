@@ -53,7 +53,13 @@ def create_workout():
 
 @app.route("/workouts/<int:id>", methods=["DELETE"])
 def delete_workout(id):
-    pass
+  workout = Workout.query.get(id)
+  if not workout:
+    return jsonify({"error": "Workout not found"}), 404
+
+  db.session.delete(workout)
+  db.session.commit()
+  return jsonify({"message": "Workout deleted successfully"}), 200
 
 @app.route("/exercises", methods=["GET"])
 def get_exercises():
