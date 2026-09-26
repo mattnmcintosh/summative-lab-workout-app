@@ -61,9 +61,9 @@ def delete_workout(id):
   db.session.commit()
   return jsonify({"message": "Workout deleted successfully"}), 200
 
-@app.route("/exercises", methods=["GET"])
 def get_exercises():
-    pass
+  exercises = Exercise.query.all()
+  return jsonify(exercises_schema.dump(exercises)), 200
 
 @app.route("/exercises/<int:id>", methods=["GET"])
 def get_exercise(id):
