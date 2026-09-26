@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import CheckConstraint
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
 
@@ -15,6 +17,19 @@ class Exercise(db.Model):
   workout_exercises = db.relationship("WorkoutExercises",back_populates="exercise",cascade="all, delete-orphan")
 
   workouts = association_proxy('workout_exercises', 'workout')
+
+  @validates("name")
+  def validate_name(self, key, name):
+    if not name or not name.strip():
+      raise ValueError("Exercise must have a valid name.")
+    return name
+
+  @validates("category")
+  def validate_category(self, key, category):
+    allowed_categories = ["Cardio", "Strength", "Flexibility", "Balance"]
+    if category and category not in allowed_categories:
+      raise ValueError(f"Category must be one of: {allowed_categories}")
+    return category
 
   def __repr__(self):
     return (f"<Exercise id={self.id}, name='{self.name}',"f" category='{self.category}'>")
@@ -32,6 +47,8 @@ class Workout(db.Model):
 
   exercises = association_proxy('workout_exercises', 'exercise')
 
+  __table_args__ = (CheckConstraint("duration_minutes > 0", name="check_duration_minutes_positive"))
+
   def __repr__(self):
     return f"<Workout id={self.id}, date='{self.date}'>"
 
@@ -48,6 +65,8 @@ class WorkoutExercises(db.Model):
   # Relationships back to Workout and Exercise
   workout = db.relationship("Workout", back_populates="workout_exercises")
   exercise = db.relationship("Exercise", back_populates="workout_exercises")
+
+  __table_args__ = (CheckConstraint("reps >= 0", name="check_reps_non_negative"))
 
   def __repr__(self):
     return (
